@@ -13,9 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using NAudio;
+using Microsoft.Win32;
 using NAudio.CoreAudioApi;
-using NAudio.Wave;
 
 namespace DiscordSoundboard
 {
@@ -27,32 +26,58 @@ namespace DiscordSoundboard
         private AudioPlayer _audioPlayer;
         private MMDevice _currentSelectedDevice;
 
-        private ObservableCollection<ComboBoxItem> outputDevicesCollection;
+        private readonly ObservableCollection<ComboBoxItem> _outputDevicesCollection;
+        private readonly ObservableCollection<AudioItem> _audioItems;
 
         public MainWindow()
         {
             InitializeComponent();
+            _outputDevicesCollection = new ObservableCollection<ComboBoxItem>();
 
-            outputDevicesCollection = new ObservableCollection<ComboBoxItem>();
+            _audioItems = new ObservableCollection<AudioItem>
+            {
+                new AudioItem
+                {
+                    Filename = "test1",
+                    Filepath = "test/test1"
+                }
+            };
+            audioItemsList.ItemsSource = _audioItems;
+
+            LoadDevicesToLists();
         }
 
-        // load
-        private void button1_Click(object sender, RoutedEventArgs e)
+        private void PlayAudio(string filepath)
         {
-            
+            if (_audioPlayer != null)
+            {
+                _audioPlayer.Stop();
+                _audioPlayer.Dispose();
+                _audioPlayer = null;
+            }
+
+            _audioPlayer = new AudioPlayer(_currentSelectedDevice, filepath);
+            //_audioPlayer.PlaybackStopped += OnPlaybackStopped;
+            _audioPlayer.Play();
+
+            textBlock.Text = filepath;
         }
 
-        // play
-        private void button2_Click(object sender, RoutedEventArgs e)
+        private void StopAudio()
         {
-            
+            if (_audioPlayer != null)
+            {
+                _audioPlayer.Stop();
+                _audioPlayer.Dispose();
+                _audioPlayer = null;
+            }
         }
 
         private void OnPlaybackStopped()
         {
             if (_audioPlayer != null)
             {
-                textBlock.Text = "stopped";
+                textBlock.Text = "stopped event";
             }
         }
 
@@ -61,18 +86,16 @@ namespace DiscordSoundboard
             if (_audioPlayer != null)
             {
                 _audioPlayer.Dispose();
+                _audioPlayer = null;
             }
-        }
 
-        // load dev
-        private void button3_Click(object sender, RoutedEventArgs e)
-        {
-            LoadDevicesToLists();
+            //MessageBox.Show("There is no escape", "42", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            //e.Cancel = true;
         }
 
         private void LoadDevicesToLists()
         {
-            outputDevicesCollection.Clear();
+            _outputDevicesCollection.Clear();
             var enumerator = new MMDeviceEnumerator();
 
             foreach (var endpoint in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
@@ -82,9 +105,9 @@ namespace DiscordSoundboard
                     Content = endpoint.FriendlyName,
                     Tag = endpoint.ID
                 };
-                outputDevicesCollection.Add(cb);
+                _outputDevicesCollection.Add(cb);
             }
-            outputDeviceComboBox.ItemsSource = outputDevicesCollection;
+            outputDeviceComboBox.ItemsSource = _outputDevicesCollection;
             outputDeviceComboBox.SelectedIndex = 0;
         }
 
@@ -119,39 +142,45 @@ namespace DiscordSoundboard
 
         private void play1_Click(object sender, RoutedEventArgs e)
         {
-            if (_audioPlayer != null)
-            {
-                _audioPlayer.Dispose();
-                _audioPlayer = null;
-            }
-
-            _audioPlayer = new AudioPlayer(_currentSelectedDevice, @"C:\Windows\Media\Alarm01.wav");
-            _audioPlayer.PlaybackStopped += OnPlaybackStopped;
-            _audioPlayer.Play();
+            PlayAudio(@"C:\Windows\Media\Alarm01.wav");
         }
 
         private void play2_Click(object sender, RoutedEventArgs e)
         {
-            if (_audioPlayer != null)
-            {
-                _audioPlayer.Dispose();
-                _audioPlayer = null;
-            }
-
-            _audioPlayer = new AudioPlayer(_currentSelectedDevice, @"C:\Windows\Media\Alarm02.wav");
-            _audioPlayer.Play();
+            PlayAudio(@"C:\Windows\Media\tada.wav");
         }
 
         private void play3_Click(object sender, RoutedEventArgs e)
         {
-            if (_audioPlayer != null)
-            {
-                _audioPlayer.Dispose();
-                _audioPlayer = null;
-            }
+            PlayAudio(@"C:\Windows\Media\ringout.wav");
+        }
 
-            _audioPlayer = new AudioPlayer(_currentSelectedDevice, @"C:\Windows\Media\Alarm03.wav");
-            _audioPlayer.Play();
+        private void stopButton_Click(object sender, RoutedEventArgs e)
+        {
+            StopAudio();
+        }
+
+        private void addButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "audio files (*.*)|*.mp3;*.wav|All files (*.*)|*.*",
+                Title = "Please select an audio file to add"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                _audioItems.Add(new AudioItem
+                {
+                    Filepath = dialog.FileName,
+                    Filename = dialog.SafeFileName
+                });
+            }
+        }
+
+        private void audioItemsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -17,6 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using NAudio.CoreAudioApi;
+using Newtonsoft.Json;
 
 namespace DiscordSoundboard
 {
@@ -25,10 +28,11 @@ namespace DiscordSoundboard
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const string ListFilePath = "AudioList.json";
         private AudioPlayer _audioPlayer;
         private MMDevice _currentSelectedDevice;
 
-        private HotKeysController _hotKeysController;
+        private readonly HotKeysController _hotKeysController;
 
         private readonly ObservableCollection<ComboBoxItem> _outputDevicesCollection;
         private readonly ObservableCollection<AudioItem> _audioItems;
@@ -37,15 +41,9 @@ namespace DiscordSoundboard
         {
             InitializeComponent();
 
-            _audioItems = new ObservableCollection<AudioItem>
-            {
-                new AudioItem
-                {
-                    Filename = "test1",
-                    Filepath = "test/test1"
-                }
-            };
+            _audioItems = new ObservableCollection<AudioItem>();
             audioItemsList.ItemsSource = _audioItems;
+            LoadListFromJson();
 
             _outputDevicesCollection = new ObservableCollection<ComboBoxItem>();
             LoadDevicesToLists();
@@ -56,7 +54,7 @@ namespace DiscordSoundboard
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            _hotKeysController.OnSourceInitialized(e);
+            //_hotKeysController.OnSourceInitialized(e);
         }
 
         protected override void OnClosed(EventArgs e)
@@ -193,12 +191,60 @@ namespace DiscordSoundboard
                     Filepath = dialog.FileName,
                     Filename = dialog.SafeFileName
                 });
+
+                SaveListToJson();
+            }
+        }
+
+        private void deleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (audioItemsList.SelectedItems.Count > 0)
+            {
+                var selectedItem = audioItemsList.SelectedItems[0] as AudioItem;
+                _audioItems.Remove(selectedItem);
+                SaveListToJson();
             }
         }
 
         private void audioItemsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             
+        }
+
+        private void SaveListToJson()
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(_audioItems, Formatting.Indented);
+                File.WriteAllText(ListFilePath, json);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void LoadListFromJson()
+        {
+            try
+            {
+                var file = File.ReadAllText(ListFilePath);
+                var list = JsonConvert.DeserializeObject<List<AudioItem>>(file);
+                _audioItems.Clear();
+                foreach (var item in list)
+                {
+                    _audioItems.Add(item);
+                }
+            }
+            catch (FileNotFoundException ex)
+            {
+                // ok
+                Debug.WriteLine(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }

@@ -39,7 +39,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <Button x:Name="addButton" Content="Add" HorizontalAlignment="Left" Margin="393,211,0,0" VerticalAlignment="Top" Width="75" Click="addButton_Click"/>
-        <Button x:Name="deleteButton" Content="Delete" HorizontalAlignment="Left" Margin="393,236,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button x:Name="deleteButton" Content="Delete" HorizontalAlignment="Left" Margin="393,236,0,0" VerticalAlignment="Top" Width="75" Click="deleteButton_Click"/>
 
 
     </Grid>

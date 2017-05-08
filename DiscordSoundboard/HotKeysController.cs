@@ -53,9 +53,12 @@ namespace DiscordSoundboard
 
         public void OnClosed(EventArgs e)
         {
-            _source.RemoveHook(HwndHook);
-            _source = null;
-            UnregisterHotKey();
+            if (_source != null)
+            {
+                _source.RemoveHook(HwndHook);
+                _source = null;
+                UnregisterHotKey();
+            }
         }
 
         private void RegisterHotKey()

@@ -82,6 +82,7 @@
     </Compile>
     <Compile Include="AudioItem.cs" />
     <Compile Include="AudioPlayer.cs" />
+    <Compile Include="HotKeysController.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

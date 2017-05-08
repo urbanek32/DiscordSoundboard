@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -9,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -26,13 +28,14 @@ namespace DiscordSoundboard
         private AudioPlayer _audioPlayer;
         private MMDevice _currentSelectedDevice;
 
+        private HotKeysController _hotKeysController;
+
         private readonly ObservableCollection<ComboBoxItem> _outputDevicesCollection;
         private readonly ObservableCollection<AudioItem> _audioItems;
 
         public MainWindow()
         {
             InitializeComponent();
-            _outputDevicesCollection = new ObservableCollection<ComboBoxItem>();
 
             _audioItems = new ObservableCollection<AudioItem>
             {
@@ -44,7 +47,22 @@ namespace DiscordSoundboard
             };
             audioItemsList.ItemsSource = _audioItems;
 
+            _outputDevicesCollection = new ObservableCollection<ComboBoxItem>();
             LoadDevicesToLists();
+
+            _hotKeysController = new HotKeysController(this);
+        }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            _hotKeysController.OnSourceInitialized(e);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            _hotKeysController.OnClosed(e);
+            base.OnClosed(e);
         }
 
         private void PlayAudio(string filepath)

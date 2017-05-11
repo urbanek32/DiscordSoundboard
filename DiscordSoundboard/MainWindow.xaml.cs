@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using DiscordSoundboard.Properties;
 using Microsoft.Win32;
 using NAudio.CoreAudioApi;
 using Newtonsoft.Json;
@@ -35,20 +36,28 @@ namespace DiscordSoundboard
         private readonly HotKeysController _hotKeysController;
 
         private readonly ObservableCollection<ComboBoxItem> _outputDevicesCollection;
-        private readonly ObservableCollection<AudioItem> _audioItems;
+        private ObservableCollection<AudioItem> AudioItems { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
+            //this.DataContext = this;
 
-            _audioItems = new ObservableCollection<AudioItem>();
-            audioItemsList.ItemsSource = _audioItems;
+            AudioItems = new ObservableCollection<AudioItem>();
+            var sc = this.Resources["SortedCollection"] as CollectionViewSource;
+            if (sc != null)
+            {
+                sc.Source = AudioItems;
+            }
+            
             LoadListFromJson();
 
             _outputDevicesCollection = new ObservableCollection<ComboBoxItem>();
             LoadDevicesToLists();
 
             _hotKeysController = new HotKeysController(this);
+
+            textBlock.Text = Settings.Default.Tester;
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -186,7 +195,7 @@ namespace DiscordSoundboard
 
             if (dialog.ShowDialog() == true)
             {
-                _audioItems.Add(new AudioItem
+                AudioItems.Add(new AudioItem
                 {
                     Filepath = dialog.FileName,
                     Filename = dialog.SafeFileName
@@ -201,21 +210,28 @@ namespace DiscordSoundboard
             if (audioItemsList.SelectedItems.Count > 0)
             {
                 var selectedItem = audioItemsList.SelectedItems[0] as AudioItem;
-                _audioItems.Remove(selectedItem);
+                AudioItems.Remove(selectedItem);
                 SaveListToJson();
             }
         }
 
         private void audioItemsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            
+            if (audioItemsList.SelectedItems.Count > 0)
+            {
+                var item = audioItemsList.SelectedItems[0] as AudioItem;
+                if (item != null)
+                {
+                    PlayAudio(item.Filepath);
+                }
+            }
         }
 
         private void SaveListToJson()
         {
             try
             {
-                var json = JsonConvert.SerializeObject(_audioItems, Formatting.Indented);
+                var json = JsonConvert.SerializeObject(AudioItems, Formatting.Indented);
                 File.WriteAllText(ListFilePath, json);
             }
             catch (Exception ex)
@@ -230,10 +246,10 @@ namespace DiscordSoundboard
             {
                 var file = File.ReadAllText(ListFilePath);
                 var list = JsonConvert.DeserializeObject<List<AudioItem>>(file);
-                _audioItems.Clear();
+                AudioItems.Clear();
                 foreach (var item in list)
                 {
-                    _audioItems.Add(item);
+                    AudioItems.Add(item);
                 }
             }
             catch (FileNotFoundException ex)
@@ -245,6 +261,12 @@ namespace DiscordSoundboard
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void sortButton_Click(object sender, RoutedEventArgs e)
+        {
+            AudioItems = new ObservableCollection<AudioItem>(AudioItems.OrderByDescending(a => a.Filename));
+            
         }
     }
 }

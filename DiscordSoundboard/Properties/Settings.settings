@@ -2,8 +2,20 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DiscordSoundboard.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="Tester" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">super userek</Value>
+    <Setting Name="Tester" Type="System.String" Scope="User">
+      <Value Profile="(Default)">super usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper userek</Value>
+    </Setting>
+    <Setting Name="ToolTip_DefaultOutputDevice" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Wybierz urządzenie do którego będzie wysyłany dźwięk. W standardowym przypadku powinien być to twój wirtualny mikrofon podłączony do Discorda.</Value>
+    </Setting>
+    <Setting Name="ToolTip_DefaultPlaybackDevice" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Wybierz urządzenie do którego będzie wysyłana lokalna kopia dźwięku. W standardowym przypadku powininny to być twoje domyślne głośniki.</Value>
+    </Setting>
+    <Setting Name="ToolTip_VolumeOfDefaultOutputDevice" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Ustaw głośność z jaką będzie odtwarzany dźwięk.</Value>
+    </Setting>
+    <Setting Name="ToolTip_VolumeOfDefaultPlaybackDevice" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Ustaw głośność z jaką będzie odtwarzany dźwięk lokalnie.</Value>
     </Setting>
   </Settings>
 </SettingsFile>

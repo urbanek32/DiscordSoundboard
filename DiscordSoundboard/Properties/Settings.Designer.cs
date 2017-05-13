@@ -13,7 +13,7 @@ namespace DiscordSoundboard.Properties {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.0.1.0")]
-    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+    public sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
         
@@ -23,12 +23,65 @@ namespace DiscordSoundboard.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("super userek")]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"super usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper usereksuper userek")]
         public string Tester {
             get {
                 return ((string)(this["Tester"]));
+            }
+            set {
+                this["Tester"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Wybierz urządzenie do którego będzie wysyłany dźwięk. W standardowym przypadku po" +
+            "winien być to twój wirtualny mikrofon podłączony do Discorda.")]
+        public string ToolTip_DefaultOutputDevice {
+            get {
+                return ((string)(this["ToolTip_DefaultOutputDevice"]));
+            }
+            set {
+                this["ToolTip_DefaultOutputDevice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Wybierz urządzenie do którego będzie wysyłana lokalna kopia dźwięku. W standardow" +
+            "ym przypadku powininny to być twoje domyślne głośniki.")]
+        public string ToolTip_DefaultPlaybackDevice {
+            get {
+                return ((string)(this["ToolTip_DefaultPlaybackDevice"]));
+            }
+            set {
+                this["ToolTip_DefaultPlaybackDevice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ustaw głośność z jaką będzie odtwarzany dźwięk.")]
+        public string ToolTip_VolumeOfDefaultOutputDevice {
+            get {
+                return ((string)(this["ToolTip_VolumeOfDefaultOutputDevice"]));
+            }
+            set {
+                this["ToolTip_VolumeOfDefaultOutputDevice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ustaw głośność z jaką będzie odtwarzany dźwięk lokalnie.")]
+        public string ToolTip_VolumeOfDefaultPlaybackDevice {
+            get {
+                return ((string)(this["ToolTip_VolumeOfDefaultPlaybackDevice"]));
+            }
+            set {
+                this["ToolTip_VolumeOfDefaultPlaybackDevice"] = value;
             }
         }
     }

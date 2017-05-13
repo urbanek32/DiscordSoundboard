@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
-        Title="Discord Soundboard" Height="576.529" Width="717.588" Background="#FFE8E6EC" Closing="Window_Closing">
+        xmlns:properties="clr-namespace:DiscordSoundboard.Properties"
+        Title="Discord Soundboard" Height="576.529" Width="738.588" Background="#FFE8E6EC" Closing="Window_Closing">
     <Window.Resources>
         <CollectionViewSource x:Key="SortedCollection">
             <CollectionViewSource.SortDescriptions>
@@ -14,24 +15,24 @@
         </CollectionViewSource>
     </Window.Resources>
     <Grid>
-        <Button x:Name="play1" Content="Play 1" HorizontalAlignment="Left" Margin="458,91,0,0" VerticalAlignment="Top" Width="75" Click="play1_Click"/>
-        <Button x:Name="play2" Content="Play 2" HorizontalAlignment="Left" Margin="458,116,0,0" VerticalAlignment="Top" Width="75" Click="play2_Click"/>
-        <Button x:Name="play3" Content="Play 3" HorizontalAlignment="Left" Margin="458,141,0,0" VerticalAlignment="Top" Width="75" Click="play3_Click"/>
-        <Button x:Name="stopButton" Content="Stop" HorizontalAlignment="Left" Margin="625,91,0,0" VerticalAlignment="Top" Width="75" Click="stopButton_Click"/>
+        <Button x:Name="stopButton" Content="Stop" HorizontalAlignment="Left" Margin="393,83,0,0" VerticalAlignment="Top" Width="75" Click="stopButton_Click" Background="#FFF5B5B5"/>
         <StatusBar Background="#FFC5C5C5" Height="25" VerticalAlignment="Bottom">
             <TextBlock x:Name="statusText" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Yep - It's fine" VerticalAlignment="Top"/>
         </StatusBar>
-        <GroupBox Header="Select output device" HorizontalAlignment="Left" Height="64" Margin="455,10,0,0" VerticalAlignment="Top" Width="245">
+        <GroupBox Header="Select output device" HorizontalAlignment="Left" Height="88" Margin="473,10,0,0" VerticalAlignment="Top" Width="245">
             <Grid Margin="0,0,0,0">
-                <ComboBox x:Name="outputDeviceComboBox" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="212" SelectionChanged="outputDeviceComboBox_SelectionChanged"/>
+                <ComboBox x:Name="outputDeviceComboBox" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="212" SelectionChanged="outputDeviceComboBox_SelectionChanged" ToolTip="{Binding Source={x:Static properties:Settings.Default}, Path=ToolTip_DefaultOutputDevice}"/>
+                <Slider HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top" Width="213" AutoToolTipPlacement="BottomRight" Value="5" ToolTip="{Binding Source={x:Static properties:Settings.Default}, Path=ToolTip_VolumeOfDefaultOutputDevice}"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Debug" HorizontalAlignment="Left" Height="196" Margin="10,10,0,0" VerticalAlignment="Top" Width="378">
+        <GroupBox Header="Debug log" HorizontalAlignment="Left" Height="152" Margin="393,191,0,0" VerticalAlignment="Top" Width="325">
             <Grid Margin="0,0,0,0">
-                <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Nuting" FontSize="14" Margin="10,10,10,10"/>
+                <ScrollViewer HorizontalAlignment="Left" Height="130" VerticalAlignment="Top" Width="313">
+                    <TextBox x:Name="debugLogBox" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Debug log here" VerticalAlignment="Top" Background="Transparent" BorderThickness="0" IsReadOnly="True" FontSize="14"/>
+                </ScrollViewer>
             </Grid>
         </GroupBox>
-        <ListBox x:Name="audioItemsList" ItemsSource="{Binding Source={StaticResource SortedCollection}}" HorizontalContentAlignment="Stretch" HorizontalAlignment="Left" Margin="10,211,0,30" Width="378" MouseDoubleClick="audioItemsList_MouseDoubleClick">
+        <ListBox x:Name="audioItemsList" ItemsSource="{Binding Source={StaticResource SortedCollection}}" HorizontalContentAlignment="Stretch" HorizontalAlignment="Left" Margin="10,10,0,30" Width="378" MouseDoubleClick="audioItemsList_MouseDoubleClick">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Margin="0,2">
@@ -45,9 +46,14 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button x:Name="addButton" Content="Add" HorizontalAlignment="Left" Margin="393,211,0,0" VerticalAlignment="Top" Width="75" Click="addButton_Click"/>
-        <Button x:Name="deleteButton" Content="Delete" HorizontalAlignment="Left" Margin="393,236,0,0" VerticalAlignment="Top" Width="75" Click="deleteButton_Click"/>
-        <Button x:Name="sortButton" Content="Sort" HorizontalAlignment="Left" Margin="393,273,0,0" VerticalAlignment="Top" Width="75" Click="sortButton_Click"/>
+        <Button x:Name="addButton" Content="Add" HorizontalAlignment="Left" Margin="393,10,0,0" VerticalAlignment="Top" Width="75" Click="addButton_Click"/>
+        <Button x:Name="deleteButton" Content="Delete" HorizontalAlignment="Left" Margin="393,35,0,0" VerticalAlignment="Top" Width="75" Click="deleteButton_Click"/>
+        <GroupBox Header="Select local playback device" HorizontalAlignment="Left" Height="88" Margin="473,98,0,0" VerticalAlignment="Top" Width="245" >
+            <Grid Margin="0,0,0,0">
+                <ComboBox x:Name="localPlaybackDeviceComboBox" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="212" SelectionChanged="localPlaybackDeviceComboBox_SelectionChanged" ToolTip="{Binding Source={x:Static properties:Settings.Default}, Path=ToolTip_DefaultPlaybackDevice}"/>
+                <Slider HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="213" AutoToolTipPlacement="BottomRight" Value="5" ToolTip="{Binding Source={x:Static properties:Settings.Default}, Path=ToolTip_VolumeOfDefaultPlaybackDevice}"/>
+            </Grid>
+        </GroupBox>
 
 
     </Grid>

@@ -30,18 +30,22 @@ namespace DiscordSoundboard
     public partial class MainWindow : Window
     {
         private const string ListFilePath = "AudioList.json";
+
         private AudioPlayer _audioPlayer;
-        private MMDevice _currentSelectedDevice;
+        private MMDevice _currentOutputDevice;
+        private MMDevice _currentLocalPlaybackDevice;
 
         private readonly HotKeysController _hotKeysController;
 
         private readonly ObservableCollection<ComboBoxItem> _outputDevicesCollection;
+        private readonly ObservableCollection<ComboBoxItem> _localPlaybackDevicesCollection;
+
         private ObservableCollection<AudioItem> AudioItems { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
-            //this.DataContext = this;
+            this.DataContext = this;
 
             AudioItems = new ObservableCollection<AudioItem>();
             var sc = this.Resources["SortedCollection"] as CollectionViewSource;
@@ -53,11 +57,12 @@ namespace DiscordSoundboard
             LoadListFromJson();
 
             _outputDevicesCollection = new ObservableCollection<ComboBoxItem>();
+            _localPlaybackDevicesCollection = new ObservableCollection<ComboBoxItem>();
             LoadDevicesToLists();
 
             _hotKeysController = new HotKeysController(this);
 
-            textBlock.Text = Settings.Default.Tester;
+            debugLogBox.Text = Settings.Default.Tester;
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -81,11 +86,11 @@ namespace DiscordSoundboard
                 _audioPlayer = null;
             }
 
-            _audioPlayer = new AudioPlayer(_currentSelectedDevice, filepath);
+            _audioPlayer = new AudioPlayer(_currentOutputDevice, filepath);
             //_audioPlayer.PlaybackStopped += OnPlaybackStopped;
             _audioPlayer.Play();
 
-            textBlock.Text = filepath;
+            debugLogBox.Text = filepath;
         }
 
         private void StopAudio()
@@ -102,7 +107,7 @@ namespace DiscordSoundboard
         {
             if (_audioPlayer != null)
             {
-                textBlock.Text = "stopped event";
+                debugLogBox.Text = "stopped event";
             }
         }
 
@@ -134,6 +139,19 @@ namespace DiscordSoundboard
             }
             outputDeviceComboBox.ItemsSource = _outputDevicesCollection;
             outputDeviceComboBox.SelectedIndex = 0;
+
+            _localPlaybackDevicesCollection.Clear();
+            foreach (var endpoint in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+            {
+                var cb = new ComboBoxItem
+                {
+                    Content = endpoint.FriendlyName,
+                    Tag = endpoint.ID
+                };
+                _localPlaybackDevicesCollection.Add(cb);
+            }
+            localPlaybackDeviceComboBox.ItemsSource = _localPlaybackDevicesCollection;
+            localPlaybackDeviceComboBox.SelectedIndex = 0;
         }
 
         private void outputDeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -141,14 +159,26 @@ namespace DiscordSoundboard
             if (e.AddedItems.Count > 0)
             {
                 var cb = e.AddedItems[0] as ComboBoxItem;
-                textBlock.Text = cb.Content.ToString();
-                textBlock.Text += cb.Tag;
+                debugLogBox.Text = cb.Content.ToString();
+                debugLogBox.Text += cb.Tag;
 
-                ReloadCurrentOutputDevice(cb.Tag.ToString());
+                SetNewAudioDevice(cb.Tag.ToString(), false);
             }
         }
 
-        private void ReloadCurrentOutputDevice(string deviceId)
+        private void localPlaybackDeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+            {
+                var cb = e.AddedItems[0] as ComboBoxItem;
+                debugLogBox.Text = cb.Content.ToString();
+                debugLogBox.Text += cb.Tag;
+
+                SetNewAudioDevice(cb.Tag.ToString(), true);
+            }
+        }
+
+        private void SetNewAudioDevice(string deviceId, bool isPlaybackDevice)
         {
             if (string.IsNullOrWhiteSpace(deviceId))
             {
@@ -162,22 +192,19 @@ namespace DiscordSoundboard
                 _audioPlayer = null;
             }
 
-            _currentSelectedDevice = new MMDeviceEnumerator().GetDevice(deviceId);
+            if (isPlaybackDevice)
+            {
+                _currentLocalPlaybackDevice = new MMDeviceEnumerator().GetDevice(deviceId);
+            }
+            else
+            {
+                _currentOutputDevice = new MMDeviceEnumerator().GetDevice(deviceId);
+            }
         }
 
         private void play1_Click(object sender, RoutedEventArgs e)
         {
             PlayAudio(@"C:\Windows\Media\Alarm01.wav");
-        }
-
-        private void play2_Click(object sender, RoutedEventArgs e)
-        {
-            PlayAudio(@"C:\Windows\Media\tada.wav");
-        }
-
-        private void play3_Click(object sender, RoutedEventArgs e)
-        {
-            PlayAudio(@"C:\Windows\Media\ringout.wav");
         }
 
         private void stopButton_Click(object sender, RoutedEventArgs e)
@@ -261,12 +288,6 @@ namespace DiscordSoundboard
             {
                 MessageBox.Show(ex.Message);
             }
-        }
-
-        private void sortButton_Click(object sender, RoutedEventArgs e)
-        {
-            AudioItems = new ObservableCollection<AudioItem>(AudioItems.OrderByDescending(a => a.Filename));
-            
         }
     }
 }

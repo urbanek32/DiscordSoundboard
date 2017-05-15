@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,9 +15,10 @@ namespace DiscordSoundboard
     {
         private WasapiOut _output;
         private AudioFileReader _audioFileReader;
-        private float _currentVolume;
         private string _filepath;
 
+        public float OutputDeviceVolume { get; set; }
+        public float PlaybackDeviceVolume { get; set; }
         public event Action PlaybackStopped;
 
         /// <summary>
@@ -25,7 +27,7 @@ namespace DiscordSoundboard
         /// <param name="device">Device on which to play audio.</param>
         /// <param name="filepath">Path to audio file to load.</param>
         /// <param name="volume">From 0.0f to 1.0f</param>
-        public AudioPlayer(MMDevice device, string filepath, float? volume = null)
+        public AudioPlayer(MMDevice device, string filepath, float? outputDeviceVolume = null, float? playbackDeviceVolume = null)
         {
             if (device == null)
             {
@@ -33,12 +35,19 @@ namespace DiscordSoundboard
                 return;
             }
 
+            if (!File.Exists(filepath))
+            {
+                MessageBox.Show($"File {filepath} not exists", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             _filepath = filepath;
-            _currentVolume = volume ?? 1.0f;
+            OutputDeviceVolume = outputDeviceVolume ?? 1.0f;
+            PlaybackDeviceVolume = playbackDeviceVolume ?? 1.0f;
 
             _audioFileReader = new AudioFileReader(_filepath)
             {
-                Volume = _currentVolume
+                Volume = OutputDeviceVolume
             };
 
             _output = new WasapiOut(device, AudioClientShareMode.Shared, true, 100);
@@ -57,7 +66,7 @@ namespace DiscordSoundboard
             if (_output != null)
             {
                 _output.Play();
-                _audioFileReader.Volume = currentVolumeLevel ?? _currentVolume;
+                _audioFileReader.Volume = currentVolumeLevel ?? OutputDeviceVolume;
             }
         }
 

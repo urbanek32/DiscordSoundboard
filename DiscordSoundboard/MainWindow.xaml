@@ -22,7 +22,7 @@
         <GroupBox Header="Select output device" HorizontalAlignment="Left" Height="88" Margin="473,10,0,0" VerticalAlignment="Top" Width="245">
             <Grid Margin="0,0,0,0">
                 <ComboBox x:Name="outputDeviceComboBox" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="212" SelectionChanged="outputDeviceComboBox_SelectionChanged" ToolTip="{Binding Source={x:Static properties:Settings.Default}, Path=ToolTip_DefaultOutputDevice}"/>
-                <Slider HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top" Width="213" AutoToolTipPlacement="BottomRight" Value="5" ToolTip="{Binding Source={x:Static properties:Settings.Default}, Path=ToolTip_VolumeOfDefaultOutputDevice}"/>
+                <Slider x:Name="outputDeviceSliderVolume" HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top" Width="213" AutoToolTipPlacement="BottomRight" Value="2" ToolTip="{Binding Source={x:Static properties:Settings.Default}, Path=ToolTip_VolumeOfDefaultOutputDevice}" ValueChanged="outputDeviceSliderVolume_ValueChanged" />
             </Grid>
         </GroupBox>
         <GroupBox Header="Debug log" HorizontalAlignment="Left" Height="152" Margin="393,191,0,0" VerticalAlignment="Top" Width="325">
@@ -51,7 +51,7 @@
         <GroupBox Header="Select local playback device" HorizontalAlignment="Left" Height="88" Margin="473,98,0,0" VerticalAlignment="Top" Width="245" >
             <Grid Margin="0,0,0,0">
                 <ComboBox x:Name="localPlaybackDeviceComboBox" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="212" SelectionChanged="localPlaybackDeviceComboBox_SelectionChanged" ToolTip="{Binding Source={x:Static properties:Settings.Default}, Path=ToolTip_DefaultPlaybackDevice}"/>
-                <Slider HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="213" AutoToolTipPlacement="BottomRight" Value="5" ToolTip="{Binding Source={x:Static properties:Settings.Default}, Path=ToolTip_VolumeOfDefaultPlaybackDevice}"/>
+                <Slider x:Name="playbackDeviceSliderVolume" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="213" AutoToolTipPlacement="BottomRight" Value="5" ToolTip="{Binding Source={x:Static properties:Settings.Default}, Path=ToolTip_VolumeOfDefaultPlaybackDevice}" ValueChanged="playbackDeviceSliderVolume_ValueChanged" />
             </Grid>
         </GroupBox>
 

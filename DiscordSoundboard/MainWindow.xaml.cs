@@ -34,13 +34,16 @@ namespace DiscordSoundboard
         private AudioPlayer _audioPlayer;
         private MMDevice _currentOutputDevice;
         private MMDevice _currentLocalPlaybackDevice;
+        private float _currentOutputDeviceVolume;
+        private float _currentPlaybackDeviceVolume;
 
         private readonly HotKeysController _hotKeysController;
 
         private readonly ObservableCollection<ComboBoxItem> _outputDevicesCollection;
         private readonly ObservableCollection<ComboBoxItem> _localPlaybackDevicesCollection;
-
         private ObservableCollection<AudioItem> AudioItems { get; set; }
+
+        private bool _settingsRestored = false;
 
         public MainWindow()
         {
@@ -61,6 +64,7 @@ namespace DiscordSoundboard
             LoadDevicesToLists();
 
             _hotKeysController = new HotKeysController(this);
+            LoadSavedSettings();
 
             debugLogBox.Text = Settings.Default.Tester;
         }
@@ -86,7 +90,7 @@ namespace DiscordSoundboard
                 _audioPlayer = null;
             }
 
-            _audioPlayer = new AudioPlayer(_currentOutputDevice, filepath);
+            _audioPlayer = new AudioPlayer(_currentOutputDevice, filepath, _currentOutputDeviceVolume, _currentPlaybackDeviceVolume);
             //_audioPlayer.PlaybackStopped += OnPlaybackStopped;
             _audioPlayer.Play();
 
@@ -119,6 +123,7 @@ namespace DiscordSoundboard
                 _audioPlayer = null;
             }
 
+            Settings.Default.Save();
             //MessageBox.Show("There is no escape", "42", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             //e.Cancel = true;
         }
@@ -126,6 +131,7 @@ namespace DiscordSoundboard
         private void LoadDevicesToLists()
         {
             _outputDevicesCollection.Clear();
+            _localPlaybackDevicesCollection.Clear();
             var enumerator = new MMDeviceEnumerator();
 
             foreach (var endpoint in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
@@ -136,22 +142,14 @@ namespace DiscordSoundboard
                     Tag = endpoint.ID
                 };
                 _outputDevicesCollection.Add(cb);
-            }
-            outputDeviceComboBox.ItemsSource = _outputDevicesCollection;
-            outputDeviceComboBox.SelectedIndex = 0;
-
-            _localPlaybackDevicesCollection.Clear();
-            foreach (var endpoint in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
-            {
-                var cb = new ComboBoxItem
-                {
-                    Content = endpoint.FriendlyName,
-                    Tag = endpoint.ID
-                };
                 _localPlaybackDevicesCollection.Add(cb);
             }
+
+            outputDeviceComboBox.ItemsSource = _outputDevicesCollection;
+            //outputDeviceComboBox.SelectedIndex = 0;
+
             localPlaybackDeviceComboBox.ItemsSource = _localPlaybackDevicesCollection;
-            localPlaybackDeviceComboBox.SelectedIndex = 0;
+            //localPlaybackDeviceComboBox.SelectedIndex = 0;
         }
 
         private void outputDeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -195,16 +193,18 @@ namespace DiscordSoundboard
             if (isPlaybackDevice)
             {
                 _currentLocalPlaybackDevice = new MMDeviceEnumerator().GetDevice(deviceId);
+                Settings.Default.PlaybackDeviceId = deviceId;
             }
             else
             {
                 _currentOutputDevice = new MMDeviceEnumerator().GetDevice(deviceId);
+                Settings.Default.OutputDeviceId = deviceId;
             }
         }
 
         private void play1_Click(object sender, RoutedEventArgs e)
         {
-            PlayAudio(@"C:\Windows\Media\Alarm01.wav");
+            PlayAudio(@"C:\Windows\Media\tada.wav");
         }
 
         private void stopButton_Click(object sender, RoutedEventArgs e)
@@ -288,6 +288,53 @@ namespace DiscordSoundboard
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void LoadSavedSettings()
+        {
+            _currentOutputDeviceVolume = Settings.Default.OutputDeviceVolume;
+            outputDeviceSliderVolume.Value = _currentOutputDeviceVolume;
+
+            _currentPlaybackDeviceVolume = Settings.Default.PlaybackDeviceVolume;
+            playbackDeviceSliderVolume.Value = _currentPlaybackDeviceVolume;
+
+            var outputDevice = _outputDevicesCollection.SingleOrDefault(a => a.Tag.Equals(Settings.Default.OutputDeviceId));
+            if (outputDevice != null)
+            {
+                outputDeviceComboBox.SelectedItem = outputDevice;
+            }
+            else
+            {
+                outputDeviceComboBox.SelectedIndex = 0;
+            }
+
+            var playbackDevice = _localPlaybackDevicesCollection.SingleOrDefault(a => a.Tag.Equals(Settings.Default.PlaybackDeviceId));
+            if (playbackDevice != null)
+            {
+                localPlaybackDeviceComboBox.SelectedItem = playbackDevice;
+            }
+            else
+            {
+                localPlaybackDeviceComboBox.SelectedIndex = 0;
+            }
+
+            _settingsRestored = true;
+        }
+
+        private void outputDeviceSliderVolume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_settingsRestored) return;
+
+            _currentOutputDeviceVolume = (float)e.NewValue;
+            Settings.Default.OutputDeviceVolume = _currentOutputDeviceVolume;
+        }
+
+        private void playbackDeviceSliderVolume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_settingsRestored) return;
+
+            _currentPlaybackDeviceVolume = (float)e.NewValue;
+            Settings.Default.PlaybackDeviceVolume = _currentPlaybackDeviceVolume;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace DiscordSoundboard.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.0.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
     public sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -82,6 +82,54 @@ namespace DiscordSoundboard.Properties {
             }
             set {
                 this["ToolTip_VolumeOfDefaultPlaybackDevice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string OutputDeviceId {
+            get {
+                return ((string)(this["OutputDeviceId"]));
+            }
+            set {
+                this["OutputDeviceId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PlaybackDeviceId {
+            get {
+                return ((string)(this["PlaybackDeviceId"]));
+            }
+            set {
+                this["PlaybackDeviceId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public float OutputDeviceVolume {
+            get {
+                return ((float)(this["OutputDeviceVolume"]));
+            }
+            set {
+                this["OutputDeviceVolume"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public float PlaybackDeviceVolume {
+            get {
+                return ((float)(this["PlaybackDeviceVolume"]));
+            }
+            set {
+                this["PlaybackDeviceVolume"] = value;
             }
         }
     }

@@ -17,5 +17,17 @@
     <Setting Name="ToolTip_VolumeOfDefaultPlaybackDevice" Type="System.String" Scope="User">
       <Value Profile="(Default)">Ustaw głośność z jaką będzie odtwarzany dźwięk lokalnie.</Value>
     </Setting>
+    <Setting Name="OutputDeviceId" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="PlaybackDeviceId" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="OutputDeviceVolume" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="PlaybackDeviceVolume" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

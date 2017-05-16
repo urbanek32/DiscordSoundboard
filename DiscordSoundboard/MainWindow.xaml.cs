@@ -83,14 +83,9 @@ namespace DiscordSoundboard
 
         private void PlayAudio(string filepath)
         {
-            if (_audioPlayer != null)
-            {
-                _audioPlayer.Stop();
-                _audioPlayer.Dispose();
-                _audioPlayer = null;
-            }
+            StopAudio();
 
-            _audioPlayer = new AudioPlayer(_currentOutputDevice, filepath, _currentOutputDeviceVolume, _currentPlaybackDeviceVolume);
+            _audioPlayer = new AudioPlayer(_currentOutputDevice, _currentLocalPlaybackDevice, filepath, _currentOutputDeviceVolume, _currentPlaybackDeviceVolume);
             //_audioPlayer.PlaybackStopped += OnPlaybackStopped;
             _audioPlayer.Play();
 
@@ -146,10 +141,7 @@ namespace DiscordSoundboard
             }
 
             outputDeviceComboBox.ItemsSource = _outputDevicesCollection;
-            //outputDeviceComboBox.SelectedIndex = 0;
-
             localPlaybackDeviceComboBox.ItemsSource = _localPlaybackDevicesCollection;
-            //localPlaybackDeviceComboBox.SelectedIndex = 0;
         }
 
         private void outputDeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -200,11 +192,6 @@ namespace DiscordSoundboard
                 _currentOutputDevice = new MMDeviceEnumerator().GetDevice(deviceId);
                 Settings.Default.OutputDeviceId = deviceId;
             }
-        }
-
-        private void play1_Click(object sender, RoutedEventArgs e)
-        {
-            PlayAudio(@"C:\Windows\Media\tada.wav");
         }
 
         private void stopButton_Click(object sender, RoutedEventArgs e)

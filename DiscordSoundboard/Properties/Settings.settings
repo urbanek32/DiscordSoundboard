@@ -24,10 +24,10 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="OutputDeviceVolume" Type="System.Single" Scope="User">
-      <Value Profile="(Default)">5</Value>
+      <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="PlaybackDeviceVolume" Type="System.Single" Scope="User">
-      <Value Profile="(Default)">5</Value>
+      <Value Profile="(Default)">1</Value>
     </Setting>
   </Settings>
 </SettingsFile>

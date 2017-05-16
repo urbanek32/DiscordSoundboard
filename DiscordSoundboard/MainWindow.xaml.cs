@@ -20,6 +20,7 @@ using System.Windows.Shapes;
 using DiscordSoundboard.Properties;
 using Microsoft.Win32;
 using NAudio.CoreAudioApi;
+using NAudio.Wave;
 using Newtonsoft.Json;
 
 namespace DiscordSoundboard
@@ -39,8 +40,8 @@ namespace DiscordSoundboard
 
         private readonly HotKeysController _hotKeysController;
 
-        private readonly ObservableCollection<ComboBoxItem> _outputDevicesCollection;
-        private readonly ObservableCollection<ComboBoxItem> _localPlaybackDevicesCollection;
+        private ObservableCollection<DeviceItem> _outputDevicesCollection;
+        private ObservableCollection<DeviceItem> _localPlaybackDevicesCollection;
         private ObservableCollection<AudioItem> AudioItems { get; set; }
 
         private bool _settingsRestored = false;
@@ -59,14 +60,20 @@ namespace DiscordSoundboard
             
             LoadListFromJson();
 
-            _outputDevicesCollection = new ObservableCollection<ComboBoxItem>();
-            _localPlaybackDevicesCollection = new ObservableCollection<ComboBoxItem>();
+            _outputDevicesCollection = new ObservableCollection<DeviceItem>();
+            _localPlaybackDevicesCollection = new ObservableCollection<DeviceItem>();
             LoadDevicesToLists();
 
             _hotKeysController = new HotKeysController(this);
             LoadSavedSettings();
 
-            debugLogBox.Text = Settings.Default.Tester;
+            debugLogBox.Text = "";
+            var devcount = WaveOut.DeviceCount;
+            for (var c = 0; c < devcount; c++)
+            {
+                var info = WaveOut.GetCapabilities(c);
+                debugLogBox.Text += $"{c}-{info.ProductName}\n";
+            }
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -85,7 +92,16 @@ namespace DiscordSoundboard
         {
             StopAudio();
 
-            _audioPlayer = new AudioPlayer(_currentOutputDevice, _currentLocalPlaybackDevice, filepath, _currentOutputDeviceVolume, _currentPlaybackDeviceVolume);
+            if (wasapiOutRadioButton.IsChecked.Value)
+            {
+                _audioPlayer = new AudioPlayer(_currentOutputDevice, _currentLocalPlaybackDevice, filepath, _currentOutputDeviceVolume, _currentPlaybackDeviceVolume);    
+            }
+
+            if (waveOutRadioButton.IsChecked.Value)
+            {
+                _audioPlayer = new AudioPlayer(outputDeviceComboBox.SelectedIndex, playbackDeviceComboBox.SelectedIndex, filepath, _currentOutputDeviceVolume, _currentPlaybackDeviceVolume);
+            }
+
             //_audioPlayer.PlaybackStopped += OnPlaybackStopped;
             _audioPlayer.Play();
 
@@ -131,40 +147,40 @@ namespace DiscordSoundboard
 
             foreach (var endpoint in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
             {
-                var cb = new ComboBoxItem
+                var item = new DeviceItem
                 {
-                    Content = endpoint.FriendlyName,
-                    Tag = endpoint.ID
+                    DeviceId = endpoint.ID,
+                    DisplayName = endpoint.FriendlyName
                 };
-                _outputDevicesCollection.Add(cb);
-                _localPlaybackDevicesCollection.Add(cb);
+                _outputDevicesCollection.Add(item);
+                _localPlaybackDevicesCollection.Add(item);
             }
 
             outputDeviceComboBox.ItemsSource = _outputDevicesCollection;
-            localPlaybackDeviceComboBox.ItemsSource = _localPlaybackDevicesCollection;
+            playbackDeviceComboBox.ItemsSource = _localPlaybackDevicesCollection;
         }
 
         private void outputDeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count > 0)
             {
-                var cb = e.AddedItems[0] as ComboBoxItem;
-                debugLogBox.Text = cb.Content.ToString();
-                debugLogBox.Text += cb.Tag;
+                var cb = e.AddedItems[0] as DeviceItem;
+                debugLogBox.Text = cb.DisplayName;
+                debugLogBox.Text += cb.DeviceId;
 
-                SetNewAudioDevice(cb.Tag.ToString(), false);
+                SetNewAudioDevice(cb.DeviceId, false);
             }
         }
 
-        private void localPlaybackDeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void playbackDeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count > 0)
             {
-                var cb = e.AddedItems[0] as ComboBoxItem;
-                debugLogBox.Text = cb.Content.ToString();
-                debugLogBox.Text += cb.Tag;
+                var cb = e.AddedItems[0] as DeviceItem;
+                debugLogBox.Text = cb.DisplayName;
+                debugLogBox.Text += cb.DeviceId;
 
-                SetNewAudioDevice(cb.Tag.ToString(), true);
+                SetNewAudioDevice(cb.DeviceId, true);
             }
         }
 
@@ -285,7 +301,7 @@ namespace DiscordSoundboard
             _currentPlaybackDeviceVolume = Settings.Default.PlaybackDeviceVolume;
             playbackDeviceSliderVolume.Value = _currentPlaybackDeviceVolume;
 
-            var outputDevice = _outputDevicesCollection.SingleOrDefault(a => a.Tag.Equals(Settings.Default.OutputDeviceId));
+            var outputDevice = _outputDevicesCollection.SingleOrDefault(a => a.DeviceId.Equals(Settings.Default.OutputDeviceId));
             if (outputDevice != null)
             {
                 outputDeviceComboBox.SelectedItem = outputDevice;
@@ -295,14 +311,14 @@ namespace DiscordSoundboard
                 outputDeviceComboBox.SelectedIndex = 0;
             }
 
-            var playbackDevice = _localPlaybackDevicesCollection.SingleOrDefault(a => a.Tag.Equals(Settings.Default.PlaybackDeviceId));
+            var playbackDevice = _localPlaybackDevicesCollection.SingleOrDefault(a => a.DeviceId.Equals(Settings.Default.PlaybackDeviceId));
             if (playbackDevice != null)
             {
-                localPlaybackDeviceComboBox.SelectedItem = playbackDevice;
+                playbackDeviceComboBox.SelectedItem = playbackDevice;
             }
             else
             {
-                localPlaybackDeviceComboBox.SelectedIndex = 0;
+                playbackDeviceComboBox.SelectedIndex = 0;
             }
 
             _settingsRestored = true;
@@ -322,6 +338,55 @@ namespace DiscordSoundboard
 
             _currentPlaybackDeviceVolume = (float)e.NewValue;
             Settings.Default.PlaybackDeviceVolume = _currentPlaybackDeviceVolume;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            debugLogBox.Text = "";
+            var devcount = WaveOut.DeviceCount;
+            for (var c = 0; c < devcount; c++)
+            {
+                var info = WaveOut.GetCapabilities(c);
+                debugLogBox.Text += $"{c}-{info.ProductName}\n";
+            }
+
+            /*var waveout = new WaveOut
+            {
+                DeviceNumber = int.Parse(indexInput.Text),
+                Volume = _currentOutputDeviceVolume
+            };
+            var afr = new AudioFileReader(@"C:\Windows\Media\tada.wav");
+            waveout.Init(afr);
+            waveout.Play();*/
+
+        }
+
+        private void outputEnabledCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (outputEnabledCheckBox.IsChecked.HasValue)
+            {
+                ToggleStateOutputDevice(outputEnabledCheckBox.IsChecked.Value);
+            }
+        }
+
+        private void playbackEnabledCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (playbackEnabledCheckBox.IsChecked.HasValue)
+            {
+                ToggleStatePlaybackDevice(playbackEnabledCheckBox.IsChecked.Value);
+            }
+        }
+
+        private void ToggleStateOutputDevice(bool state)
+        {
+            outputDeviceComboBox.IsEnabled = state;
+            outputDeviceSliderVolume.IsEnabled = state;
+        }
+
+        private void ToggleStatePlaybackDevice(bool state)
+        {
+            playbackDeviceComboBox.IsEnabled = state;
+            playbackDeviceSliderVolume.IsEnabled = state;
         }
     }
 }

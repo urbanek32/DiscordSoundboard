@@ -16,6 +16,8 @@ namespace DiscordSoundboard
     {
         private WasapiOut _output;
         private WasapiOut _playbackOutput;
+        private WaveOut _outputWaveout;
+        private WaveOut _playbackWaveout;
         private AudioFileReader _outputAudioFileReader;
         private AudioFileReader _playbackAudioFileReader;
         private WaveChannel32 _outputWaveChannel32;
@@ -47,8 +49,30 @@ namespace DiscordSoundboard
             OutputDeviceVolume = outputDeviceVolume ?? 1.0f;
             PlaybackDeviceVolume = playbackDeviceVolume ?? 1.0f;
 
+            Debug.WriteLine("WAS");
+            Debug.WriteLine(OutputDeviceVolume);
+
             InitOutput(outputDevice);
             InitPlayback(playbackDevice);
+        }
+
+        public AudioPlayer(int outputDeviceId, int playbackDeviceId, string filepath, float? outputDeviceVolume = null, float? playbackDeviceVolume = null)
+        {
+            if (!File.Exists(filepath))
+            {
+                MessageBox.Show($"File {filepath} not exists", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            _filepath = filepath;
+            OutputDeviceVolume = outputDeviceVolume ?? 1.0f;
+            PlaybackDeviceVolume = playbackDeviceVolume ?? 1.0f;
+
+            Debug.WriteLine("WAVE");
+            Debug.WriteLine(OutputDeviceVolume);
+
+            InitOutputWaveout(outputDeviceId);
+            InitPlaybackWaveout(playbackDeviceId);
         }
 
         public void Play()
@@ -61,6 +85,16 @@ namespace DiscordSoundboard
             if (_playbackOutput != null)
             {
                 _playbackOutput.Play();
+            }
+
+            if (_outputWaveout != null)
+            {
+                _outputWaveout.Play();
+            }
+
+            if (_playbackWaveout != null)
+            {
+                _playbackWaveout.Play();
             }
         }
 
@@ -75,6 +109,16 @@ namespace DiscordSoundboard
             {
                 _playbackOutput.Stop();
             }
+
+            if (_outputWaveout != null)
+            {
+                _outputWaveout.Stop();
+            }
+
+            if (_playbackWaveout != null)
+            {
+                _playbackWaveout.Stop();
+            }
         }
 
         private void _output_PlaybackStopped(object sender, StoppedEventArgs e)
@@ -84,6 +128,23 @@ namespace DiscordSoundboard
             {
                 PlaybackStopped();
             }
+        }
+
+        private void InitOutputWaveout(int outputDeviceId)
+        {
+            _outputWaveout = new WaveOut
+            {
+                DeviceNumber = outputDeviceId
+            };
+
+            _outputWaveout.PlaybackStopped += _output_PlaybackStopped;
+
+            _outputAudioFileReader = new AudioFileReader(_filepath)
+            {
+                Volume = OutputDeviceVolume,
+            };
+
+            _outputWaveout.Init(_outputAudioFileReader);
         }
 
         private void InitOutput(MMDevice outputDevice)
@@ -102,6 +163,23 @@ namespace DiscordSoundboard
             };
 
             _output.Init(_outputWaveChannel32);
+        }
+
+        private void InitPlaybackWaveout(int playbackDeviceId)
+        {
+            _playbackWaveout = new WaveOut
+            {
+                DeviceNumber = playbackDeviceId
+            };
+
+            _playbackWaveout.PlaybackStopped += _output_PlaybackStopped;
+
+            _playbackAudioFileReader = new AudioFileReader(_filepath)
+            {
+                Volume = PlaybackDeviceVolume,
+            };
+
+            _playbackWaveout.Init(_playbackAudioFileReader);
         }
 
         private void InitPlayback(MMDevice playbackDevice)
@@ -130,8 +208,20 @@ namespace DiscordSoundboard
                 {
                     _output.Stop();
                 }
+
                 _output.Dispose();
                 _output = null;
+            }
+
+            if (_outputWaveout != null)
+            {
+                if (_outputWaveout.PlaybackState == PlaybackState.Playing)
+                {
+                    _outputWaveout.Stop();
+                }
+
+                _outputWaveout.Dispose();
+                _outputWaveout = null;
             }
 
             if (_outputAudioFileReader != null)
@@ -152,8 +242,20 @@ namespace DiscordSoundboard
                 {
                     _playbackOutput.Stop();
                 }
+
                 _playbackOutput.Dispose();
                 _playbackOutput = null;
+            }
+
+            if (_playbackWaveout != null)
+            {
+                if (_playbackWaveout.PlaybackState == PlaybackState.Playing)
+                {
+                    _playbackWaveout.Stop();
+                }
+
+                _playbackWaveout.Dispose();
+                _playbackWaveout = null;
             }
 
             if (_playbackAudioFileReader != null)
